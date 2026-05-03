@@ -396,7 +396,7 @@
     function RenderMutPanel() {
       const container = document.getElementById('mut-tags');
       container.innerHTML = '';
-      mutationDefs.forEach(m => {
+      MutationDefs.forEach(m => {
         const btn = document.createElement('button');
         btn.className = 'mut-tag' + (ActiveMutations.has(m) ? ' active' : '');
         btn.textContent = m;
