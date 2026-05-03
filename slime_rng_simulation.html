@@ -89,15 +89,46 @@
     .ctrl-btn:disabled { opacity: 0.3; cursor: not-allowed; }
     .ctrl-count { font-size: 14px; font-weight: 700; color: #c0b0f0; min-width: 20px; text-align: center; }
 
-    .ctrl-divider { width: 1px; height: 20px; background: #2a2245; margin: 0 4px; }
-    .level-input {
-      width: 70px; padding: 4px 8px; background: #1a1828;
-      border: 1px solid #2e2448; border-radius: 8px;
-      color: #c0b0f0; font-size: 13px; font-weight: 700;
-      font-family: inherit; text-align: center; outline: none;
-      transition: border-color 0.12s;
+    .team-stats-panel {
+      position: relative; overflow: hidden;
+      background: #13112a; border: 1.5px solid #2a2245;
+      border-radius: 16px; padding: 1.25rem 1.5rem;
+      margin-bottom: 1.25rem;
+      display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
     }
-    .level-input:focus { border-color: #5040a0; }
+    .team-stats-orb {
+      position: absolute; border-radius: 50%;
+      filter: blur(40px); opacity: 0.15; pointer-events: none;
+    }
+    .team-stats-orb-1 { width: 160px; height: 160px; background: #6040d0; top: -40px; left: -30px }
+    .team-stats-orb-2 { width: 120px; height: 120px; background: #a040c0; bottom: -30px; right: 40px }
+    .team-stats-label {
+      font-size: 10px; font-weight: 700; color: #4a4070;
+      letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px;
+      position: relative; z-index: 1;
+    }
+    .team-stats-left { position: relative; z-indexL: 1; }
+    .team-stats-title {
+      font-size: 13px; font-weight: 700; color: #7060c0;
+      letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 2px;
+    }
+    .team-stats-subtitle { font-size: 10px; color: #3a3460; }
+    .team-stats-values {
+      display: flex; gap: 2rem; position: relative; z-index: 1;
+    }
+    .team-stat-block { display: flex; flex-direction: column; align-items: flex-end; }
+    .team-stat-value {
+      font-size: 26px; font-weight: 800; letter-spacing: -0.5px; line-height: 1;
+    }
+    .team-stat-value.atk {
+      background: linear-gradient(120deg, #ffcc88 0%, #ff9040 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .team-stat-value.hp {
+      background: linear-gradient(120deg, #ff88aa 0%, #e04070 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .team-stat-icon { font-size: 11px; color: #4a4070; margin-bottom: 2px; letter-spacing: 0.06em; text-transform: uppercase; }
     
     .slots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
 
@@ -122,7 +153,8 @@
     .slot-name { font-size: 12px; font-weight: 700; text-align: center; }
     .slot-tier { font-size: 9px; color: #5a5080; text-align: center; }
     .slot-mut { font-size: 8px; color: #8070b0; text-align: center; line-height: 1.4; }
-
+    .slot-level { font-size: 9px; color: #4a4070; text-align: center; margin-top: 1px; }
+    
     .slot-tooltip {
       display: none;
       position: absolute;
@@ -227,6 +259,21 @@
       font-style: italic; letter-spacing: 0.03em;
     }
 
+    .mut-level-row {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #0f0e1a; border: 1px solid #2a2245;
+      border-radius: 8px; padding: 7px 10px;
+    }
+    .mut-level-label { font-size: 11px; color: #5a5080; font-weight: 600; }
+    .mut-level-input {
+      width: 64px; padding: 4px 6px; background: #1a1828;
+      border: 1px solid #2e2448; border-radius: 6px;
+      color: #c0b0f0; font-size: 13px; font-weight: 700;
+      font-family: inherit; text-align: center; outline: none;
+      transition: boreder-color 0.12s;
+    }
+    .mut-level-input:focus { border-color: #5040a0; }
+
     .stat-preview {
       background: #0f0e1a; border: 1px solid #2a2245;
       border-radius: 10px; padding: 10px 12px;
@@ -275,14 +322,30 @@
         </div>
       </div>
 
+      <div class="team-stats-panel">
+        <div class="team-stats-orb team-stats-orb-1"></div>
+        <div class="team-stats-orb team-stats-orb-2"></div>
+        <div class="team-stats-left">
+          <div class="team-stats-title">Overall Team Stats</div>
+          <div class="team-stats-subtitle">Combined Across All Equipped Slimes</div>
+        </div>
+        <div class="team-stats-values">
+          <div class="team-stat-block">
+            <div class="team-stat-icon">💪 Total ATK</div>
+            <div class="team-stat-value atk" id="team-total-atk">—</div>
+          </div>
+          <div class="team-stat-block">
+            <div class="team-stat-icon">❤️ Total HP</div>
+            <div class="team-stat-value hp" id="team-total-hp">—</div>
+          </div>
+        </div>
+      </div>
+
       <div class="controls-row">
         <span class="ctrl-label">Max Slots</span>
         <button class="ctrl-btn" id="btn-minus" onclick="ChangeSlots(-1)">−</button>
         <span class="ctrl-count" id="slot-count">1</span>
         <button class="ctrl-btn" id="btn-plus" onclick="ChangeSlots(1)">+</button>
-        <div class="ctrl-divider"></div>
-        <span class="ctrl-label">Level</span>
-        <input type="number" class="level-input" id="level-input" min="1" max="250" value="1" oninput="OnLevelChange()" />
       </div>
 
       <div class="slots-grid" id="slots-grid"></div>
@@ -305,6 +368,10 @@
             <div class="mut-divider"></div>
             <div class="mut-tags" id="mut-tags"></div>
             <span class="mut-preview" id="mut-preview"></span>
+            <div class="mut-level-row">
+              <span class="mut-level-label">Level</span>
+              <input type="number" class="mut-level-input" id="pending-level-input" min="1" max="250" value="1" oninput="OnPendingLevelChange()" />
+            </div>
             <div class="mut-divider"></div>
             <div class="stat-preview" id="stat-preview">
               <span class="stat-preview-title">Preview</span>
@@ -383,7 +450,7 @@
     let ActiveSlotIndex = null;
     let PendingSlime = null;
     let ActiveMutations = new Set();
-    let CurrentLevel = 1;
+    let PendingLevel = 1;
 
     const SlotData = Array(8).fill(null);
 
@@ -444,11 +511,25 @@
       return qi === query.length ? score : -1;
     }
 
-    function OnLevelChange() {
-      const val = parseInt(document.getElementById('level-input').value) || 1;
-      CurrentLevel = Math.max(1, Math.min(250, val));
-      RenderSlots();
+    function OnPendingLevelChange() {
+      const val = parseInt(document.getElementById('pending-level-input').value) || 1;
+      PendingLevel = Math.max(1, Math.min(250, val));
       if (PendingSlime) UpdateStatPreview();
+    }
+
+    function UpdateTeamStats() {
+      let TotalATK = 0, TotalHP = 0;
+      let HasAny = fale;
+      for (let i = 0; i < MaxSlots; i++) {
+        const data = SlotData[i];
+        if (!data) continue;
+        HasAny = true;
+        const MutSet = new Set(data.mutations || []);
+        TotalATK += CalcATK(data, MutSet, data.level || 1);
+        TotalHP  += CalcHP(data, MutSet, data.level || 1);
+      }
+      document.getElementById('team-total-atk').textContent = HasAny ? FormatNum(TotalATK) : '—';
+      document.getElementById('team-total-hp').textContent  = HasAny ? FormatNum(TotalHP) : '—';
     }
 
     function ChangeSlots(delta) {
@@ -492,6 +573,7 @@
           const MutSet = new Set(data.mutations || []);
           const label = MutLabel(new Set(data.mutations || []));
           const FullName = label ? label + ' ' + data.name : data.name;
+          const SlotLvl = data.level || 1;
           const atk = CalcATK(data, MutSet, CurrentLevel);
           const hp = CalcHP(data, MutSet, CurrentLevel);
           const Rarity = CalcRarity(data, MutSet)
@@ -500,14 +582,17 @@
             <span class="slot-name" style="color:${data.color}">${data.name}</span>
             <span class="slot-tier">${data.tier}</span>
             ${label ? `<span class="slot-mut">${label}</span>` : ''}
+            <span class="slot-level">Lv. ${SlotLvl}</span>
             <div class="slot-tooltip">
              <div class="tooltip-fullname">${FullName}</div>
              <div class="tooltip-rarity">${FormatRarity(Rarity)}</div>
              <div class="tooltip-tier" style="color: ${data.color}">${data.tier}</div>
+             
              <div class="tooltip-divider"></div>
+             
              <div class="tooltip-stat">💪 ${FormatNum(atk)}</div>
              <div class="tooltip-stat">❤️ ${FormatNum(hp)}</div>
-             <div class="tooltip-level">Level ${CurrentLevel}</div>
+             <div class="tooltip-level">Level ${SlotLvl}</div>
             </div>
           `;
         } else {
@@ -520,12 +605,17 @@
         slot.onclick = () => OpenInventory(idx);
         grid.appendChild(slot);
       }
+      UpdateTeamStats();
     }
 
     function OpenInventory(SlotIndex) {
       ActiveSlotIndex = SlotIndex;
       PendingSlime = null;
       ActiveMutations.clear();
+
+      PendingLevel = SlotData[SlotIndex]?.level || 1;
+      document.getElementById('pending-level-input').value = PendingLevel;
+      
       const section = document.getElementById('inv-section');
       section.classList.add('open');
       document.getElementById('inv-search').value = '';
@@ -621,6 +711,7 @@
       SlotData[ActiveSlotIndex] = {
         ...PendingSlime,
         mutations: OrderedMutations(ActiveMutations),
+        level: PendingLevel,
       };
       UpdateEquippedLabel();
       RenderSlots();
