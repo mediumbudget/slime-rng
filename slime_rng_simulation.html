@@ -107,7 +107,7 @@
       letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px;
       position: relative; z-index: 1;
     }
-    .team-stats-left { position: relative; z-indexL: 1; }
+    .team-stats-left { position: relative; z-index: 1; }
     .team-stats-title {
       font-size: 13px; font-weight: 700; color: #7060c0;
       letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 2px;
@@ -171,7 +171,7 @@
     .tooltip-rarity { font-size: 11px; font-weight: 600; color: #a090d0; margin-bottom: 2px; }
     .tooltip-tier { font-size: 10px; margin-bottom: 8px; }
     .tooltip-divider { height: 1px; background: #2a2245; margin-bottom: 8px; }
-    .tooltip-stat { font-size: 12px; font-weight: 600; color: #d0c8f0; margin-bottomg: 3px; }
+    .tooltip-stat { font-size: 12px; font-weight: 600; color: #d0c8f0; margin-bottom: 3px; }
     .tooltip-level { font-size: 10px; color: #5a5080; margin-top: 4px; }
     
     .inv-divider {
@@ -270,7 +270,7 @@
       border: 1px solid #2e2448; border-radius: 6px;
       color: #c0b0f0; font-size: 13px; font-weight: 700;
       font-family: inherit; text-align: center; outline: none;
-      transition: boreder-color 0.12s;
+      transition: border-color 0.12s;
     }
     .mut-level-input:focus { border-color: #5040a0; }
 
@@ -519,7 +519,7 @@
 
     function UpdateTeamStats() {
       let TotalATK = 0, TotalHP = 0;
-      let HasAny = fale;
+      let HasAny = false;
       for (let i = 0; i < MaxSlots; i++) {
         const data = SlotData[i];
         if (!data) continue;
@@ -574,8 +574,8 @@
           const label = MutLabel(new Set(data.mutations || []));
           const FullName = label ? label + ' ' + data.name : data.name;
           const SlotLvl = data.level || 1;
-          const atk = CalcATK(data, MutSet, CurrentLevel);
-          const hp = CalcHP(data, MutSet, CurrentLevel);
+          const atk = CalcATK(data, MutSet, PendingLevel);
+          const hp = CalcHP(data, MutSet, PendingLevel);
           const Rarity = CalcRarity(data, MutSet)
           
           slot.innerHTML = `
@@ -698,8 +698,8 @@
 
     function UpdateStatPreview() {
       if (!PendingSlime) return;
-      const atk = CalcATK(PendingSlime, ActiveMutations, CurrentLevel);
-      const hp = CalcHP(PendingSlime, ActiveMutations, CurrentLevel);
+      const atk = CalcATK(PendingSlime, ActiveMutations, PendingLevel);
+      const hp = CalcHP(PendingSlime, ActiveMutations, PendingLevel);
       const Rarity = CalcRarity(PendingSlime, ActiveMutations);
       document.getElementById('preview-atk').textContent = '💪 ' + FormatNum(atk);
       document.getElementById('preview-hp').textContent = '❤️ ' + FormatNum(hp);
