@@ -89,6 +89,16 @@
     .ctrl-btn:disabled { opacity: 0.3; cursor: not-allowed; }
     .ctrl-count { font-size: 14px; font-weight: 700; color: #c0b0f0; min-width: 20px; text-align: center; }
 
+    .ctrl-divider { width: 1px; height: 20px; background: #2a2245; margin: 0 4px; }
+    .level-input {
+      width: 70px; padding: 4px 8px; background: #1a1828;
+      border: 1px solid #2e2448; border-radius: 8px;
+      color: #c0b0f0; font-size: 13px; font-weight: 700;
+      font-family: inherit; text-align: center; outline: none;
+      transition: border-color 0.12s;
+    }
+    .level-input:focus { border-color: #5040a0; }
+    
     .slots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
 
     .slot {
@@ -113,6 +123,25 @@
     .slot-tier { font-size: 9px; color: #5a5080; text-align: center; }
     .slot-mut { font-size: 8px; color: #8070b0; text-align: center; line-height: 1.4; }
 
+    .slot-tooltip {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%; transform: translateX(-50%);
+      background: #1a1630; border: 1.5px solid #3a3060;
+      border-radius: 12px; padding: 12px 14px;
+      min-width: 170px; z-index: 100;
+      pointer-events: none;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+    .slot:hover .slot-tooltip { display: block; }
+    .tooltip-fullname { font-size: 13px; font-weight: 700; color: #e0d8ff; margin-bottom: 3px; }
+    .tooltip-rarity { font-size: 11px; font-weight: 600; color: #a090d0; margin-bottom: 2px; }
+    .tooltip.tier { font-size: 10px; margin-bottom: 8px; }
+    .tooltip-divider { height: 1px; background: #2a2245; margin-bottom: 8px; }
+    .tooltip.stat { font-size: 12px; font-weight: 600; color: #d0c8f0; margin-bottomg: 3px; }
+    .tooltip.level { font-size: 10px; color: #5a5080; margin-top: 4px; }
+    
     .inv-divider {
       margin-top: 2rem; height: 1px;
       background: linear-gradient(90deg, transparent, #2e2548 30%, #4a3880 50%, #2e2548 70%, transparent);
@@ -166,9 +195,9 @@
     .inv-card-name { font-size: 13px; font-weight: 700; color: #d0c8f0; }
     .inv-card-tier { font-size: 10px; font-weight: 500; }
     .inv-no-results { grid-column: 1 / -1; text-align: center; padding: 2rem; color: #2e2a48; font-size: 13px; }
-
+    
     .mut-panel {
-      width: 200px; flex-shrink: 0;
+      width: 210px; flex-shrink: 0;
       background: #13112a; border: 1.5px solid #2a2245;
       border-radius: 14px; padding: 1.25rem 1rem;
       display: flex; flex-direction: column; gap: 10px;
@@ -197,6 +226,15 @@
       font-size: 10px; color: #5a5080; min-height: 14px;
       font-style: italic; letter-spacing: 0.03em;
     }
+
+    .stat-preview {
+      background: #0f0e1a; border: 1px solid #2a2245;
+      border-radius: 10px; padding: 10px 12px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .stat-preview-title { font-size: 10px; font-weight: 700; color: #4a4070; letter-spacing: 0.08em; text-transform: uppercase; }
+    .stat-preview-row { font-size: 12px; font-weight: 600; color: #c0b0f0; }
+    .stat-preview-rarity { font-size: 10px; color: #7060a0; margin-top: 2px; }
 
     .apply-btn {
       margin-top: 4px; padding: 10px; border-radius: 10px;
@@ -242,6 +280,9 @@
         <button class="ctrl-btn" id="btn-minus" onclick="ChangeSlots(-1)">−</button>
         <span class="ctrl-count" id="slot-count">1</span>
         <button class="ctrl-btn" id="btn-plus" onclick="ChangeSlots(1)">+</button>
+        <div class="ctrl-divider"></div>
+        <span class="ctrl-label">Level</span>
+        <input type="number" class="level-input" id="level-input" min="1" max="250" value="1" oninput="OnLevelChange()" />
       </div>
 
       <div class="slots-grid" id="slots-grid"></div>
@@ -264,6 +305,14 @@
             <div class="mut-divider"></div>
             <div class="mut-tags" id="mut-tags"></div>
             <span class="mut-preview" id="mut-preview"></span>
+            <div class="mut-divider"></div>
+            <div class="stat-preview" id="stat-preview">
+              <span class="stat-preview-title">Preview</span>
+              <span class="stat-preview-row" id="preview-atk">💪 ATK —</span>
+              <span class="stat-preview-row" id="preview-hp">❤️ HP —</span>
+              <div class="mut-divider"></div>
+              <span class="stat-preview-rarity" id="preview-rarity">Rarity —</span>
+            </div>
             <button class="apply-btn" onclick="ApplySlime()">Equip →</button>
           </div>
         </div>
@@ -272,8 +321,38 @@
   </div>
 
   <script>
+    const STAT_MULTIS = {
+      "": 1,
+      "Big": 4,
+      "Shiny": 6,
+      "Huge": 10,
+      "Inverted": 13,
+      "Big Inverted": 52,
+      "Huge Inverted": 130,
+      "Shiny Inverted": 78,
+      "Shiny Big": 24,
+      "Shiny Huge": 60,
+      "Shiny Big Inverted": 312,
+      "Shiny Huge Inverted": 780,
+    };
+
+    const RARITY_MULTIS = {
+       "": 1,
+      "Big": 100,
+      "Shiny": 250,
+      "Huge": 1000,
+      "Inverted": 2500,
+      "Shiny Big": 25000,
+      "Shiny Huge": 250000,
+      "Big Inverted": 250000,
+      "Shiny Inverted": 625000,
+      "Huge Inverted": 2500000,
+      "Shiny Big Inverted": 62500000,
+      "Shiny Huge Inverted": 625000000,
+    }
+    
     const slimes = [
-      { name: "Goopy", tier: "Basic", color: "#aaaaaa" },
+      { name: "Goopy", tier: "Basic", color: "#aaaaaa", BaseATK: 4, BaseHP: 10, BaseRarity: 3 },
     ];
 
     const MUT_ORDER = ["Shiny", "Big", "Huge", "Inverted"];
@@ -283,6 +362,7 @@
     let ActiveSlotIndex = null;
     let PendingSlime = null;
     let ActiveMutations = new Set();
+    let CurrentLevel = 1;
 
     const SlotData = Array(8).fill(null);
 
@@ -295,6 +375,44 @@
       return ordered.length ? ordered.join(' ') : '';
     }
 
+    function GetStatMulti(MutSet) {
+      const key = MutLabel(MutSet);
+      return STAT_MULTIS[key] ?? 1;
+    }
+
+    function GetRarityMulti(MutSet) {
+      const key = MutLabel(MutSet);
+      return RARITY_MULTIS[key] ?? 1;
+    }
+
+    function CalcATK(slime, MutSet, level) {
+      const multi = GetStatMulti(MutSet);
+      return Math.round((slime.BaseATK + Math.floor((level - 1) / 2)) * multi);
+    }
+
+    function CalcHP(slime, MutSet, level) {
+      const multi = GetStatMulti(MutSet);
+      return Math.round((slime.BaseHP / 10) * (9 + level) * multi);
+    }
+
+    function CalcRarity(slime, MutSet) {
+      return slime.BaseRarity * GetRarityMulti(MutSet);
+    }
+
+    function FormatNum(n) {
+      if (n >= 1e18) return (n / 1e15).toFixed(2).replace(/\.?0+$/, '') + 'Qn';
+      if (n >= 1e15) return (n / 1e15).toFixed(2).replace(/\.?0+$/, '') + 'Qd';
+      if (n >= 1e12) return (n / 1e12).toFixed(2).replace(/\.?0+$/, '') + 'T';
+      if (n >= 1e9)  return (n / 1e9 ).toFixed(2).replace(/\.?0+$/, '') + 'B';
+      if (n >= 1e6)  return (n / 1e6 ).toFixed(2).replace(/\.?0+$/, '') + 'M';
+      if (n >= 1e3)  return (n / 1e3 ).toFixed(2).replace(/\.?0+$/, '') + 'K';
+      return Math.round(n).toLocaleString();
+    }
+
+    function FormatRarity(n) {
+      return '1 / ' + FormatNum(n)
+    }
+
     function FuzzyScore(query, target) {
       query = query.toLowerCase(); target = target.toLowerCase();
       if (target.includes(query)) return 1000 + (1000 - target.indexOf(query));
@@ -303,6 +421,13 @@
         if (target[ti] === query[qi]) { score += 10 - (ti - lastMatch - 1); lastMatch = ti; qi++; }
       }
       return qi === query.length ? score : -1;
+    }
+
+    function OnLevelChange() {
+      const val = parseInt(document.getElementById('level-input').value) || 1;
+      CurrentLevel = Math.max(1, Math.min(250, val));
+      RenderSlots();
+      if (PendingSlime) UpdateStatPreview();
     }
 
     function ChangeSlots(delta) {
@@ -342,16 +467,32 @@
           slot.style.borderStyle = 'solid';
           slot.style.borderColor = data.color;
           slot.style.background = '#1a1636';
+
+          const MutSet = new Set(data.mutations || []);
           const label = MutLabel(new Set(data.mutations || []));
+          const FullName = label ? label + ' ' + data.name : data.name;
+          const atk = CalcATK(data, MutSet, CurrentLevel);
+          const hp = CalcHP(data, MutSet, CurrentLevel);
+          const Rarity = CalcRarity(data, MutSet)
+          
           slot.innerHTML = `
             <span class="slot-name" style="color:${data.color}">${data.name}</span>
             <span class="slot-tier">${data.tier}</span>
             ${label ? `<span class="slot-mut">${label}</span>` : ''}
+            <div class="slot-tooltip">
+             <div class="tooltip-fullname">${FullName}</div>
+             <div class="tooltip-rarity">${FormatRarity(Rarity)}</div>
+             <div class="tooltip-tier" style="color: ${data.color}">${data.tier}</div>
+             <div class="tooltip-divider"></div>
+             <div class="tooltip-stat">💪 ${FormatNum(atk)}</div>
+             <div class="tooltip-stat">❤️ ${FormatNum(hp)}</div>
+             <div class="tooltip-level">Level ${CurrentLevel}</div>
+            </div>
           `;
         } else {
           slot.innerHTML = `
             <div class="slot-plus"><span class="slot-plus-icon">+</span></div>
-            <span class="slot-empty-label">Empty slot</span>
+            <span class="slot-empty-label">Empty Slot</span>
           `;
         }
         const idx = i;
@@ -411,6 +552,7 @@
       document.getElementById('mut-panel').classList.add('visible');
       document.getElementById('mut-slime-name').textContent = slime.name;
       RenderMutPanel();
+      UpdateStatPreview();
       RenderInventory();
     }
 
@@ -434,12 +576,23 @@
           if (isActive) ActiveMutations.delete(m);
           else ActiveMutations.add(m);
           RenderMutPanel();
+          UpdateStatPreview();
         };
         container.appendChild(btn);
       });
 
       const preview = MutLabel(ActiveMutations);
       document.getElementById('mut-preview').textContent = preview ? preview : 'No Mutations';
+    }
+
+    function UpdateStatPreview() {
+      if (!PendingSlime) return;
+      const atk = CalcATK(PendingSlime, ActiveMutations, CurrentLevel);
+      const hp = CalcHP(PendingSlime, ActiveMutations, CurrentLevel);
+      const Rarity = CalcRarity(PendingSlime, ActiveMutations);
+      document.getElementById('preview-atk').textContent = '💪 ' + FormatNum(atk);
+      document.getElementById('preview-hp').textContent = '❤️ ' + FormatNum(hp);
+      document.getElementById('preview-rarity').textContent = FormatRarity(Rarity);
     }
 
     function ApplySlime() {
