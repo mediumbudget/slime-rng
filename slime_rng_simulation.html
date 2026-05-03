@@ -698,8 +698,8 @@
 
     function UpdateStatPreview() {
       if (!PendingSlime) return;
-      const atk = CalcATK(PendingSlime, ActiveMutations, SlotLvl);
-      const hp = CalcHP(PendingSlime, ActiveMutations, SlotLvl);
+      const atk = CalcATK(PendingSlime, ActiveMutations, PendingLevel);
+      const hp = CalcHP(PendingSlime, ActiveMutations, PendingLevel);
       const Rarity = CalcRarity(PendingSlime, ActiveMutations);
       document.getElementById('preview-atk').textContent = '💪 ' + FormatNum(atk);
       document.getElementById('preview-hp').textContent = '❤️ ' + FormatNum(hp);
