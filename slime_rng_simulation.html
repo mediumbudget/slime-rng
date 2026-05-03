@@ -468,7 +468,6 @@
     let ActiveSlotIndex = null;
     let PendingSlime = null;
     let ActiveMutations = new Set();
-    let PendingLevel = 1;
 
     const SlotData = Array(8).fill(null);
 
@@ -530,9 +529,12 @@
     }
 
     function OnPendingLevelChange() {
-      const val = parseInt(document.getElementById('pending-level-input').value) || 1;
-      PendingLevel = Math.max(1, Math.min(250, val));
       if (PendingSlime) UpdateStatPreview();
+    }
+
+    function GetPendingLevel() {
+      const val = parseInt(document.getElementById('pending-level-input').value || 1;
+      return Math.max(1, Math.min(250, val)
     }
 
     function UpdateTeamStats() {
@@ -715,26 +717,23 @@
     }
 
     function UpdateStatPreview() {
-      if (!PendingSlime) return;
-      const atk = CalcATK(PendingSlime, ActiveMutations, PendingLevel);
-      const hp = CalcHP(PendingSlime, ActiveMutations, PendingLevel);
-      const Rarity = CalcRarity(PendingSlime, ActiveMutations);
-      document.getElementById('preview-atk').textContent = '💪 ' + FormatNum(atk);
-      document.getElementById('preview-hp').textContent = '❤️ ' + FormatNum(hp);
-      document.getElementById('preview-rarity').textContent = FormatRarity(Rarity);
-    }
+  if (!PendingSlime) return;
+  const level = GetPendingLevel();
+  const atk = CalcATK(PendingSlime, ActiveMutations, level);
+  const hp = CalcHP(PendingSlime, ActiveMutations, level);
+  const Rarity = CalcRarity(PendingSlime, ActiveMutations);
+  ...
+}
 
-    function ApplySlime() {
-      if (ActiveSlotIndex === null || !PendingSlime) return;
-      SlotData[ActiveSlotIndex] = {
-        ...PendingSlime,
-        mutations: OrderedMutations(ActiveMutations),
-        level: PendingLevel,
-      };
-      UpdateEquippedLabel();
-      RenderSlots();
-      CloseInventory();
-    }
+  function ApplySlime() {
+   if (ActiveSlotIndex === null || !PendingSlime) return;
+   SlotData[ActiveSlotIndex] = {
+     ...PendingSlime,
+     mutations: OrderedMutations(ActiveMutations),
+     level: GetPendingLevel(),
+   };
+   ...
+ }
 
     ChangeSlots(0);
   </script>
