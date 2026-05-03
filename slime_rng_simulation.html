@@ -717,23 +717,23 @@
     }
 
     function UpdateStatPreview() {
-  if (!PendingSlime) return;
-  const level = GetPendingLevel();
-  const atk = CalcATK(PendingSlime, ActiveMutations, level);
-  const hp = CalcHP(PendingSlime, ActiveMutations, level);
-  const Rarity = CalcRarity(PendingSlime, ActiveMutations);
-  ...
-}
+     if (!PendingSlime) return;
+      const level = GetPendingLevel();
+      const atk = CalcATK(PendingSlime, ActiveMutations, level);
+      const hp = CalcHP(PendingSlime, ActiveMutations, level);
+      const Rarity = CalcRarity(PendingSlime, ActiveMutations);
+      ...
+    }
 
-  function ApplySlime() {
-   if (ActiveSlotIndex === null || !PendingSlime) return;
-   SlotData[ActiveSlotIndex] = {
-     ...PendingSlime,
-     mutations: OrderedMutations(ActiveMutations),
-     level: GetPendingLevel(),
-   };
-   ...
- }
+   function ApplySlime() {
+    if (ActiveSlotIndex === null || !PendingSlime) return;
+     SlotData[ActiveSlotIndex] = {
+      ...PendingSlime,
+      mutations: OrderedMutations(ActiveMutations),
+      level: GetPendingLevel(),
+    };
+    ...
+  }
 
     ChangeSlots(0);
   </script>
