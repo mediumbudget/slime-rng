@@ -61,11 +61,21 @@
 
     .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
     .section-title { font-size: 12px; font-weight: 700; color: #7060c0; letter-spacing: 0.1em; text-transform: uppercase; }
+ 
+    .section-header-right { display: flex; align-items: center; gap: 10px; }
     .equipped-badge {
       font-size: 12px; font-weight: 600; color: #5a5080;
       background: rgba(80, 50, 120, 0.18); border: 1px solid #2e2448;
       border-radius: 999px; padding: 3px 12px;
     }
+
+    .clear-btn{
+      font-size: 11px; font-weight: 600; color: #6a3040;
+      background: rgba(120, 40, 60, 0.12); border: 1px solid #4a2030;
+      border-radius: 999px; padding: 3px 12px; cursor: pointer;
+      font-family: inherit; transition: all 0.12s;
+    }
+    .clear-btn:hover{color: #e06070; border-color: #8a3050; background: rgba(160, 40, 70, 0.2);}
 
     .controls-row { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; }
     .ctrl-label { font-size: 12px; color: #5a5080; white-space: nowrap; }
@@ -97,8 +107,11 @@
     .slot:hover .slot-plus { border-color: #6050b0; background: #252050; }
     .slot-plus-icon { font-size: 18px; color: #4a4080; line-height: 1; transition: color 0.15s; }
     .slot:hover .slot-plus-icon { color: #8070c0; }
-    .slot-label { font-size: 10px; color: #3a3060; font-weight: 500; letter-spacing: 0.06em; transition: color 0.15s; }
-    .slot:hover .slot-label { color: #7060b0; }
+    .slot-empty-label{ font-size: 10px; color: #3a3060; font-weight: 500; letter-spacing: 0.06em; transition: color 0.15s; }
+    .slot:hover .slot-empty-label { color: #7060b0; }
+    .slot-name { font-size: 12px; font-weight: 700; text-align: center; }
+    .slot-tier { font-size: 9px; color: #5a5080; text-align: center; }
+    .slot-mut { font-size: 8px; color: #8070b0; text-align: center; line-height: 1.4; }
 
     .inv-divider {
       margin-top: 2rem; height: 1px;
@@ -113,7 +126,6 @@
     .inv-section.open { max-height: 900px; opacity: 1; margin-top: 1.5rem; }
 
     .inv-body { display: flex; gap: 14px; align-items: flex-start; }
-
     .inv-left { flex: 1; min-width: 0; }
 
     .inv-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
@@ -151,6 +163,9 @@
     }
     .inv-card:hover { background: #201e3a; border-color: #5040a0; }
     .inv-card.selected { border-color: #8060d0; background: #221e42; }
+    .inv-card-name { font-size: 13px; font-weight: 700; color: #d0c8f0; }
+    .inv-card-tier { font-size: 10px; font-weight: 500; }
+    .inv-no-results { grid-column: 1 / -1; text-align: center; padding: 2rem; color: #2e2a48; font-size: 13px; }
 
     .inv-card-icon {
       width: 44px; height: 44px; border-radius: 10px;
@@ -186,7 +201,13 @@
     }
     .mut-tag:hover { border-color: #4a3880; color: #a090d0; background: #201e38; }
     .mut-tag.active { border-color: #7060c0; background: #221e42; color: #c0b0f0; }
+    .mut-tag.disabled { opacity: 0.25; cursor: not-allowed; }
 
+    .mut-preview {
+      font-size: 10px; color: #5a5080; min-height: 14px;
+      font-style: italic; letter-spacing: 0.03em;
+    }
+    
     .apply-btn {
       margin-top: 4px; padding: 10px; border-radius: 10px;
       border: 1.5px solid #5040a0; background: rgba(80,50,160,0.2);
@@ -220,6 +241,8 @@
     <div class="content">
       <div class="section-header">
         <span class="section-title">Slime Team</span>
+        <div class="section-header-right">
+          <button class="clear-btn" onclick="ClearTeam()">✕ Clear Team</button>
         <span class="equipped-badge" id="equipped-label">0 / 1 Equipped</span>
       </div>
 
@@ -236,12 +259,12 @@
 
       <div class="inv-section" id="inv-section">
         <div class="inv-header">
-          <span class="inv-label">Inventory — select a slime</span>
+          <span class="inv-label">Inventory — Select a Slime</span>
           <button class="inv-close-btn" onclick="CloseInventory()">✕ Close</button>
         </div>
         <div class="inv-body">
           <div class="inv-left">
-            <input type="text" class="inv-search" id="inv-search" placeholder="Search slimes..." oninput="RenderInventory()" />
+            <input type="text" class="inv-search" id="inv-search" placeholder="Search Slimes..." oninput="RenderInventory()" />
             <div class="inv-grid" id="inv-grid"></div>
           </div>
           <div class="mut-panel" id="mut-panel">
@@ -249,6 +272,7 @@
             <span class="mut-slime-name" id="mut-slime-name">—</span>
             <div class="mut-divider"></div>
             <div class="mut-tags" id="mut-tags"></div>
+            <span class="mut-preview" id="mut-preview"></span>
             <button class="apply-btn" onclick="ApplySlime()">Equip →</button>
           </div>
         </div>
@@ -261,7 +285,8 @@
       { name: "Goopy", tier: "Basic", color: "#aaaaaa" },
     ];
 
-    const MutationDefs = ["Shiny", "Big", "Huge", "Inverted"];
+    const MUT_ORDER = ["Shiny", "Big", "Huge", "Inverted"]
+    const SIZE_GROUP = new Set(["Big"], ["Huge"]);
 
     let MaxSlots = 1;
     let ActiveSlotIndex = null;
@@ -269,6 +294,15 @@
     let ActiveMutations = new Set();
    
     const SlotData = Array(8).fill(null);
+
+    function OrderedMutations(MutSet){
+      return MUT_ORDER.filter(m => MutSet.has(m));
+    }
+
+    function MutLabel(MutSet){
+      const ordered = OrderedMutations(MutSet);
+      return ordered.length ? ordered.join(' '): '';
+    }
 
     function FuzzyScore(query, target) {
       query = query.toLowerCase(); target = target.toLowerCase();
@@ -299,6 +333,13 @@
       document.getElementById('equipped-label').textContent = equipped + ' / ' + MaxSlots + ' Equipped';
     }
 
+    function ClearTeam(){
+      for (let i = 0; i < 8; i++) SlotData[i] = null;
+      UpdateEquippedLabel();
+      RenderSlots();
+      CloseInventory();
+    }
+
     function RenderSlots() {
       const grid = document.getElementById('slots-grid');
       grid.innerHTML = '';
@@ -306,26 +347,22 @@
         const slot = document.createElement('div');
         slot.className = 'slot';
         const data = SlotData[i];
-        if (data) {
+         if (data) {
           slot.style.borderStyle = 'solid';
           slot.style.borderColor = data.color;
           slot.style.background = '#1a1636';
-         
-          const initials = data.name.slice(0, 2).toUpperCase();
-          const MutLabel = data.mutations && data.mutations.length ? data.mutations.join(', ') : '';
-         
+           
+          const label = MutLabel(new Set(data.mutations || []));
+           
           slot.innerHTML = `
-            <div class="slot-plus" style="border-color:${data.color}44;background:#1e1a36;width:44px;height:44px;">
-              <span style="font-size:15px;font-weight:700;color:${data.color}">${initials}</span>
-            </div>
-            <span class="slot-label" style="color:${data.color};margin-top:4px;">${data.name}</span>
-            <span style="font-size:9px;color:#5a5080;margin-top:1px;">${data.tier}</span>
-            ${MutLabel ? `<span style="font-size:8px;color:#7060a0;margin-top:2px;">${MutLabel}</span>` : ''}
+            <span class="slot-name" style="color:${data.color}">${data.name}</span>
+            <span class="slot-tier">${data.tier}</span>
+            ${label ? `<span class="slot-mut">${label}</span>` : ''}
           `;
         } else {
           slot.innerHTML = `
             <div class="slot-plus"><span class="slot-plus-icon">+</span></div>
-            <span class="slot-label">Empty Slot</span>
+            <span class="slot-empty-label">Empty slot</span>
           `;
         }
         const idx = i;
@@ -371,11 +408,8 @@
       }
       results.forEach(s => {
         const card = document.createElement('div');
-        card.className = 'inv-card';
-        if (PendingSlime && PendingSlime.name === s.name) card.classList.add('selected');
-        const initials = s.name.slice(0, 2).toUpperCase();
+        card.className = 'inv-card' + (PendingSlime && PendingSlime.name === s.name ? ' selected' : '');
         card.innerHTML = `
-          <div class="inv-card-icon"><span class="inv-card-icon-letter">${initials}</span></div>
           <span class="inv-card-name">${s.name}</span>
           <span class="inv-card-tier" style="color:${s.color}">${s.tier}</span>
         `;
@@ -393,27 +427,40 @@
       RenderInventory();
     }
 
-    function RenderMutPanel() {
+   function RFenderMutPanel() {
       const container = document.getElementById('mut-tags');
       container.innerHTML = '';
-      MutationDefs.forEach(m => {
+ 
+      const CurrentSize = [...ActiveMutations].find(m => SIZE_GROUP.has(m)) || null;
+      const atMax = ActiveMutations.size >= 3;
+ 
+      MUT_ORDER.forEach(m => {
+        const isActive = ActiveMutations.has(m);
+        
+        const ConflictsSize = SIZE_GROUP.has(m) && CurrentSize && CurrentSize !== m;
+        const isDisabled = (!isActive && atMax) || ConflictsSize;
+ 
         const btn = document.createElement('button');
-        btn.className = 'mut-tag' + (ActiveMutations.has(m) ? ' active' : '');
+        btn.className = 'mut-tag' + (isActive ? ' active' : '') + (isDisabled ? ' disabled' : '');
         btn.textContent = m;
         btn.onclick = () => {
-          if (ActiveMutations.has(m)) ActiveMutations.delete(m);
+          if (isDisabled) return;
+          if (isActive) ActiveMutations.delete(m);
           else ActiveMutations.add(m);
           RenderMutPanel();
         };
         container.appendChild(btn);
       });
+ 
+      const preview = MutLabel(ActiveMutations);
+      document.getElementById('mut-preview').textContent = preview ? preview : 'No Mutations';
     }
 
     function ApplySlime() {
       if (ActiveSlotIndex === null || !PendingSlime) return;
       SlotData[ActiveSlotIndex] = {
         ...PendingSlime,
-        mutations: [...ActiveMutations],
+        mutations: OrderedMutations(ActiveMutations),
       };
       UpdateEquippedLabel();
       RenderSlots();
