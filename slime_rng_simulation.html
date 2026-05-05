@@ -35,7 +35,7 @@
     .orb2 { width: 240px; height: 240px; background: #a040c0; top: -40px; right: -40px; }
 
     /* --- Header --- */
-    .header { display: flex; align-items: center; gap: 14px; position: relative; z-index: 1; }
+    .header { display: flex; align-items: center; justify-content: space-between; gap: 14px; position: relative; z-index: 1; }
     .header-left { display: flex; align-items: center; gap: 14px; }
     .title-block { display: flex; flex-direction: column; gap: 2px; }
     .eyebrow { font-size: 10px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: #7060b0; }
@@ -56,7 +56,7 @@
     /* --- Disclaimer text in header --- */
     .header-disclaimer {
       font-size: 10px; color: #4a3860; font-style: italic;
-      ltter-spacing: 0.02em; text-align: right; max-width: 180px; line-height: 1.4;
+      letter-spacing: 0.02em; text-align: right; max-width: 180px; line-height: 1.4;
     }
     
     .divider-line {
@@ -83,7 +83,7 @@
     }
     .home-desc {
       font-size: 13px; color: #5a5080; line-height: 1.7;
-      max-width: 5060px; margin: 0 auto 0.5rem;
+      max-width: 560px; margin: 0 auto 0.5rem;
     }
     .home-subdesc {
       font-size: 11px; color: #3a3060; margin-top: 0.4rem;
@@ -98,7 +98,7 @@
       letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.75rem;
     }
     .breadcrumb-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, mixmax(180px, 1fr));
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
       gap: 10px;
     }
     .breadcrumb-btn {
@@ -403,19 +403,19 @@
             </button>
             <!-- Coming soon placeholders will be here -->
             <button class="breadcrumb-btn" disabled style="opacity: 0.45; cursor: not-allowed;">
-              <span class="breadcrumb-btn-soon=">Soon</span>
+              <span class="breadcrumb-btn-soon">Soon</span>
               <span class="breadcrumb-btn-icon">🍀</span>
               <span class="breadcrumb-btn-name">Luck Calculator</span>
               <span class="breadcrumb-btn-desc">Combine all the luck factors that boost your luck to view overall luck.</span>
             </button>
             <button class="breadcrumb-btn" disabled style="opacity: 0.45; cursor: not-allowed;">
-              <span class="breadcrumb-btn-soon=">Soon</span>
+              <span class="breadcrumb-btn-soon">Soon</span>
               <span class="breadcrumb-btn-icon">🧐</span>
               <span class="breadcrumb-btn-name">Compare Slime Stats</span>
               <span class="breadcrumb-btn-desc">Side by side stat comparison between 2 slimes with any mutations.</span>
             </button>
             <button class="breadcrumb-btn" disabled style="opacity: 0.45; cursor: not-allowed;">
-              <span class="breadcrumb-btn-soon=">Soon</span>
+              <span class="breadcrumb-btn-soon">Soon</span>
               <span class="breadcrumb-btn-icon">🍴</span>
               <span class="breadcrumb-btn-name">Food Calculator</span>
               <span class="breadcrumb-btn-desc">Find out exactly how much food you need to reach your target level for a slime.</span>
@@ -426,7 +426,7 @@
       <!-- End home page -->
 
       <!-- Slime team feature page -->
-      <div class="feature page" id="page-slime-team">
+      <div class="feature-page" id="page-slime-team">
         <div class="back-bar">
           <button class="back-btn" onclick="NavigateTo('home')">← Home</button>
           <span class="back-crumb">Home</span>
