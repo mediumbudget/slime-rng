@@ -699,6 +699,7 @@
     // --- Formatting
 
     function FormatNum(n) {
+      if (n >= 1e21) return (n / 1e21).toFixed(2).replace(/\.?0+$/, '') + 'Sx';
       if (n >= 1e18) return (n / 1e18).toFixed(2).replace(/\.?0+$/, '') + 'Qn';
       if (n >= 1e15) return (n / 1e15).toFixed(2).replace(/\.?0+$/, '') + 'Qd';
       if (n >= 1e12) return (n / 1e12).toFixed(2).replace(/\.?0+$/, '') + 'T';
